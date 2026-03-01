@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EJBEH CADASTRE MAP</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- (Optional) search control -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #map { height: 100%; width: 100%; }
+
+    /* Branding UI (similar style: clean, glassy, fixed) */
+    .brand {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      z-index: 9999;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+      font-family: Arial, sans-serif;
+      max-width: 340px;
+    }
+    .brand .title { font-size: 16px; font-weight: 700; margin: 0 0 4px 0; }
+    .brand .sub { font-size: 12px; opacity: 0.75; margin: 0; }
+
+    .logo {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 9999;
+      width: 54px;
+      height: 54px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .logo img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+
+    .footer {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      z-index: 9999;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 12px;
+      padding: 8px 10px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .footer a { color: #0b5fff; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* Popup styling */
+    .popup-title { font-weight: 700; margin-bottom: 6px; }
+    .kv { display: grid; grid-template-columns: 90px 1fr; gap: 6px 10px; }
+    .k { opacity: 0.75; }
+    .v { word-break: break-word; }
+
+    /* Small helper button */
+    .btn {
+      cursor: pointer;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: white;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .btn:hover { background: #f3f5f7; }
+  </style>
+</head>
+
+<body>
+  <!-- Branding (edit to match your cemetery map details) -->
+  <div class="brand">
+    <p class="title">EJBEH CADASTRE MAP</p>
+    <p class="sub">Parcels: EJBEH_PARCELS • Skygridlb</p>
+  </div>
+
+  <!-- Logo (replace with your actual logo path) -->
+  <div class="logo" title="Skygridlb">
+    <!-- Put your logo file next to this HTML, e.g. skygridlb_logo.png -->
+    <img src="skygridlb_logo.png" alt="Skygridlb Logo" onerror="this.style.display='none';" />
+  </div>
+
+  <div id="map"></div>
+
+  <!-- Footer / contact -->
+  <div class="footer">
+    <span><b>Skygridlb</b></span>
+    <span>© <span id="y"></span></span>
+    <!-- Edit these -->
+    <a href="https://www.linkedin.com/company/skygridlb/" target="_blank" rel="noopener">LinkedIn</a>
+    <button class="btn" id="btnHome">Home</button>
+  </div>
+
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+
+    // Start location you gave
+    const startLat = 34.308659;
+    const startLng = 35.941757;
+    const startZoom = 18;
+
+    // Map
+    const map = L.map('map', {
+      zoomControl: true,
+      preferCanvas: true
+    }).setView([startLat, startLng], startZoom);
+
+    // "Google satellite look" background:
+    // NOTE: Using real Google Satellite tiles directly is not allowed without Google's official API & terms.
+    // This Esri layer is a solid satellite substitute and works on GitHub Pages.
+    const esriImagery = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      { maxZoom: 21, attribution: 'Imagery © Esri' }
+    ).addTo(map);
+
+    // Optional label overlay to make satellite readable
+    const esriLabels = L.tileLayer(
+      'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+      { maxZoom: 21, attribution: 'Labels © Esri' }
+    ).addTo(map);
+
+    const baseLayers = {
+      "Satellite (Esri)": esriImagery
+    };
+    const overlays = {
+      "Labels": esriLabels
+    };
+    L.control.layers(baseLayers, overlays, { collapsed: true }).addTo(map);
+
+    // Parcels styling
+    function parcelStyle(feature) {
+      return {
+        color: '#ff3b30',     // red outline
+        weight: 2,
+        fillColor: '#ff3b30',
+        fillOpacity: 0.08
+      };
+    }
+
+    // Popup helper: safely get property by trying multiple keys (because field names vary)
+    function getAny(props, keys) {
+      for (const k of keys) {
+        if (props && props[k] !== undefined && props[k] !== null && String(props[k]).trim() !== "") {
+          return props[k];
+        }
+      }
+      return null;
+    }
+
+    // Load your parcels GeoJSON
+    // Export EJBEH_PARCELS to GeoJSON and put it next to this HTML as: EJBEH_PARCELS.geojson
+    // (ArcGIS Pro: Features To JSON -> GeoJSON, or QGIS: Save Features As -> GeoJSON)
+    const parcelsUrl = "EJBEH_PARCELS.geojson";
+
+    let parcelsLayer = null;
+
+    fetch(parcelsUrl)
+      .then(r => {
+        if (!r.ok) throw new Error("Could not load " + parcelsUrl);
+        return r.json();
+      })
+      .then(geojson => {
+        parcelsLayer = L.geoJSON(geojson, {
+          style: parcelStyle,
+          onEachFeature: (feature, layer) => {
+            const p = feature.properties || {};
+
+            // Try common field names (adjust to your actual schema)
+            const parcelNum = getAny(p, ["Parc_Num", "PARC_NUM", "Parcel_Num", "PARCEL_NUM", "PARCELNO", "ParcelNo"]);
+            const owner = getAny(p, ["Owner", "OWNER", "Owners_All", "OWNERS_ALL"]);
+            const mahalla = getAny(p, ["AL_MAHALLA", "Mahalla", "MAHALLA"]);
+            const area = getAny(p, ["Area", "AREA", "Shape_Area", "SHAPE_AREA"]);
+
+            const html = `
+              <div class="popup-title">Parcel${parcelNum ? " #" + parcelNum : ""}</div>
+              <div class="kv">
+                ${owner ? `<div class="k">Owner</div><div class="v">${owner}</div>` : ""}
+                ${mahalla ? `<div class="k">Mahalla</div><div class="v">${mahalla}</div>` : ""}
+                ${area ? `<div class="k">Area</div><div class="v">${area}</div>` : ""}
+              </div>
+            `;
+
+            layer.bindPopup(html, { maxWidth: 420 });
+
+            // Hover highlight
+            layer.on('mouseover', () => layer.setStyle({ weight: 3, fillOpacity: 0.15 }));
+            layer.on('mouseout', () => layer.setStyle(parcelStyle(feature)));
+          }
+        }).addTo(map);
+
+        try { map.fitBounds(parcelsLayer.getBounds(), { padding: [20, 20] }); } catch(e) {}
+      })
+      .catch(err => {
+        console.error(err);
+        alert("GeoJSON not found. Put EJBEH_PARCELS.geojson next to the HTML file.\n\nError: " + err.message);
+      });
+
+    // Home button
+    document.getElementById("btnHome").addEventListener("click", () => {
+      map.setView([startLat, startLng], startZoom);
+    });
+
+    // Search:
+    // 1) Geocoder search (places) - optional
+    if (L.Control && L.Control.Geocoder) {
+      L.Control.geocoder({
+        defaultMarkGeocode: true
+      }).addTo(map);
+    }
+
+    // 2) Parcel search by Parcel Number (simple prompt)
+    // If you want a nice search box like your cemetery map, tell me what library you used there
+    // (or upload that HTML) and I’ll match it exactly.
+    map.on('keypress', (e) => {
+      // Press "/" key to search parcel number quickly
+      if (e.originalEvent && e.originalEvent.key === "/") {
+        e.originalEvent.preventDefault();
+        const q = prompt("Search Parcel Number (Parc_Num):");
+        if (!q || !parcelsLayer) return;
+
+        let found = null;
+        parcelsLayer.eachLayer(l => {
+          const props = l.feature && l.feature.properties ? l.feature.properties : {};
+          const pn = getAny(props, ["Parc_Num", "PARC_NUM", "Parcel_Num", "PARCEL_NUM"]);
+          if (pn !== null && String(pn).trim() === String(q).trim()) found = l;
+        });
+
+        if (found) {
+          map.fitBounds(found.getBounds(), { padding: [30, 30] });
+          found.openPopup();
+        } else {
+          alert("Not found: " + q);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
