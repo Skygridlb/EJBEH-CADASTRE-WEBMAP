@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Awesomplete (lightweight autocomplete) -->
+  <!-- Awesomplete (autocomplete) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js"></script>
 
@@ -17,238 +17,270 @@
     html, body { height: 100%; margin: 0; }
     #map { height: 100%; width: 100%; }
 
-    /* === Cemetery-like branding blocks === */
-    .topPanel {
+    /* ===== TOP SEARCH CARD (clean, no tip) ===== */
+    .card {
       position: absolute;
-      top: 14px;
-      left: 14px;
       z-index: 9999;
       background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       border: 1px solid rgba(0,0,0,0.10);
-      border-radius: 12px;
-      padding: 10px 12px;
+      border-radius: 14px;
       box-shadow: 0 10px 24px rgba(0,0,0,0.12);
       font-family: Arial, sans-serif;
-      max-width: 380px;
     }
-    .topPanel h1 {
+
+    #topCard{
+      top: 14px;
+      left: 14px;
+      padding: 12px 12px 10px 12px;
+      width: 330px;
+      max-width: calc(100vw - 28px);
+    }
+
+    #topCard h1{
+      margin: 0 0 4px 0;
       font-size: 16px;
-      margin: 0 0 6px 0;
       font-weight: 800;
-      letter-spacing: 0.2px;
+      letter-spacing: .2px;
     }
-    .topPanel .sub {
-      font-size: 12px;
-      opacity: 0.75;
+    #topCard .sub{
       margin: 0 0 10px 0;
-    }
-
-    /* Search row like cemetery ("Search" + "Clear") */
-    .searchRow {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 8px;
-    }
-    .btn {
-      cursor: pointer;
-      border: 1px solid rgba(0,0,0,0.15);
-      background: white;
-      border-radius: 10px;
-      padding: 6px 10px;
       font-size: 12px;
-      user-select: none;
+      opacity: .75;
     }
-    .btn:hover { background: #f2f4f6; }
 
-    .inputs {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-    }
-    .inpWrap label {
-      display: block;
-      font-size: 11px;
-      opacity: 0.7;
-      margin-bottom: 4px;
-    }
-    .inp {
-      width: 100%;
-      box-sizing: border-box;
-      border: 1px solid rgba(0,0,0,0.18);
-      border-radius: 10px;
-      padding: 8px 10px;
-      font-size: 13px;
-      outline: none;
+    .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .inputs{ display:grid; grid-template-columns: 1fr; gap:10px; margin-top:10px; }
+    label{ display:block; font-size:11px; opacity:.75; margin:0 0 4px 0; }
+
+    .inp{
+      width:100%;
+      box-sizing:border-box;
+      border:1px solid rgba(0,0,0,0.18);
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:13px;
+      outline:none;
       background: rgba(255,255,255,0.96);
     }
 
-    /* Compact mode (when zoom in) */
-    .topPanel.compact {
-      max-width: 260px;
-      padding: 8px 10px;
+    .btn{
+      cursor:pointer;
+      border:1px solid rgba(0,0,0,0.14);
+      background:#fff;
+      border-radius:12px;
+      padding:7px 10px;
+      font-size:12px;
+      user-select:none;
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
     }
-    .topPanel.compact h1 { font-size: 14px; margin-bottom: 4px; }
-    .topPanel.compact .sub { display: none; }
-    .topPanel.compact .inp { padding: 6px 8px; font-size: 12px; }
-    .topPanel.compact .btn { padding: 5px 8px; font-size: 11px; }
+    .btn:hover{ background:#f2f4f6; }
 
-    /* Optional collapse button */
-    .collapseRow {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 6px;
+    .miniBtn{
+      padding:6px 9px;
+      font-size:12px;
+      border-radius:12px;
     }
 
-    /* Bottom-left cemetery-like contact card */
-    .footerCard {
-      position: absolute;
+    /* ===== Compact mode when zoomed in (your request) ===== */
+    #topCard.compact{
+      width: 250px;
+      padding: 10px;
+    }
+    #topCard.compact h1{ font-size: 14px; margin-bottom: 2px; }
+    #topCard.compact .sub{ display:none; }
+    #topCard.compact .inp{ padding:8px 10px; font-size:12px; }
+    #topCard.compact .btn{ padding:6px 9px; font-size:11px; }
+
+    /* hide inputs (toggle) */
+    #topCard.hidden .inputs { display:none; }
+    #topCard.hidden .sub { display:none; }
+
+    /* ===== Bottom-left branding like cemetery ===== */
+    #brandCard{
       left: 14px;
       bottom: 14px;
-      z-index: 9999;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border: 1px solid rgba(0,0,0,0.10);
-      border-radius: 12px;
-      padding: 10px 12px;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.12);
-      font-family: Arial, sans-serif;
-      font-size: 12px;
+      padding: 12px 14px;
       max-width: 360px;
+      width: 360px;
+      max-width: calc(100vw - 28px);
     }
-    .logos {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
+    #brandCard .powered{
+      font-size: 11px;
+      opacity: .70;
+      margin: 0 0 8px 0;
     }
-    .logos img {
-      height: 28px;
-      width: auto;
+    #brandCard .brandRow{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-bottom: 10px;
+    }
+    #brandCard .logoBox{
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.95);
+      border: 1px solid rgba(0,0,0,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      flex: 0 0 auto;
+    }
+    #brandCard .logoBox img{
+      width: 100%;
+      height: 100%;
       object-fit: contain;
-      display: block;
+      padding: 8px;
+      display:block;
     }
-    .powered {
-      font-size: 11px;
-      opacity: 0.75;
-      margin: 0 0 6px 0;
-    }
-    .name {
-      font-weight: 800;
+    #brandCard .name{
       margin: 0;
-      font-size: 13px;
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: .2px;
+      line-height: 1.2;
     }
-    .role {
+    #brandCard .role{
       margin: 2px 0 0 0;
-      opacity: 0.8;
       font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.2px;
+      font-weight: 800;
+      opacity: .80;
+      letter-spacing: .25px;
     }
-    .contactLine { margin: 6px 0 0 0; }
-    .socials {
-      margin-top: 8px;
-      display: flex;
+    #brandCard .contact{
+      margin: 8px 0 0 0;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    #brandCard .socials{
+      margin-top: 10px;
+      display:flex;
       gap: 10px;
       flex-wrap: wrap;
     }
-    .socials a { color: #0b5fff; text-decoration: none; }
-    .socials a:hover { text-decoration: underline; }
+    #brandCard .socials a{
+      text-decoration:none;
+      color:#0b5fff;
+      font-weight:700;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: rgba(255,255,255,0.9);
+    }
+    #brandCard .socials a:hover{ background:#f2f4f6; }
 
-    /* Popup */
-    .popup-title { font-weight: 800; margin-bottom: 6px; }
-    .kv { display: grid; grid-template-columns: 95px 1fr; gap: 6px 10px; }
-    .k { opacity: 0.7; }
-    .v { word-break: break-word; }
+    #brandCard .tagline{
+      margin: 10px 0 0 0;
+      font-size: 11px;
+      opacity: .70;
+      letter-spacing: .6px;
+    }
+
+    /* ===== Popup ===== */
+    .popup-title{ font-weight: 900; margin-bottom: 6px; }
+    .kv{ display:grid; grid-template-columns: 95px 1fr; gap: 6px 10px; }
+    .k{ opacity:.75; font-weight:700; }
+    .v{ word-break: break-word; }
+
+    /* Optional: make Awesomplete dropdown look nicer over map */
+    .awesomplete > ul { border-radius: 12px; overflow: hidden; }
   </style>
 </head>
 
 <body>
-  <!-- Top-left panel (branding + search like cemetery) -->
-  <div class="topPanel" id="topPanel">
-    <h1>EJBEH CADASTRE MAP</h1>
-    <p class="sub">Parcels: EJBEH_PARCELS • Skygridlb</p>
+  <!-- TOP SEARCH -->
+  <div class="card" id="topCard">
+    <div class="row" style="justify-content:space-between;">
+      <div>
+        <h1>EJBEH CADASTRE MAP</h1>
+        <div class="sub">Parcels: EJBEH_PARCELS • Skygridlb</div>
+      </div>
+      <button class="btn miniBtn" id="btnToggle" title="Hide/Show">Hide</button>
+    </div>
 
-    <div class="searchRow">
+    <div class="row">
       <button class="btn" id="btnSearch">Search</button>
       <button class="btn" id="btnClear">Clear</button>
       <button class="btn" id="btnHome">Home</button>
     </div>
 
-    <div class="inputs" id="inputs">
-      <div class="inpWrap">
-        <label for="qParcel">Parcel Number</label>
+    <div class="inputs">
+      <div>
+        <label for="qParcel">Search by Parcel Number</label>
         <input id="qParcel" class="inp" placeholder="e.g. 530" autocomplete="off" />
       </div>
 
-      <div class="inpWrap">
-        <label for="qOwner">Owner (Arabic)</label>
+      <div>
+        <label for="qOwner">Search by Owner (Arabic) — autocomplete</label>
         <input id="qOwner" class="inp" placeholder="اكتب اسم المالك..." autocomplete="off" />
       </div>
-    </div>
-
-    <div class="collapseRow">
-      <button class="btn" id="btnToggle">Hide</button>
     </div>
   </div>
 
   <div id="map"></div>
 
-  <!-- Bottom-left contact card (cemetery-like) -->
-  <div class="footerCard">
-    <p class="powered">Powered by</p>
+  <!-- BOTTOM-LEFT BRANDING (cemetery style) -->
+  <div class="card" id="brandCard">
+    <div class="powered">Powered by</div>
 
-    <div class="logos">
-      <!-- Put these in your repo -->
-      <img src="logo/maronite.png" alt="Maronite" onerror="this.style.display='none';" />
-      <img src="logo/skygridlb.png" alt="Skygridlb" onerror="this.style.display='none';" />
+    <div class="brandRow">
+      <div class="logoBox">
+        <!-- Put logo here: /assets/skygridlb.png -->
+        <img src="assets/skygridlb.png" alt="Skygridlb" onerror="this.style.display='none';" />
+      </div>
+
+      <div>
+        <p class="name">FADI BOULOS KASS HANNA</p>
+        <p class="role">OWNER | GENERAL MANAGER</p>
+        <p class="role">GEO SPATIAL ENGINEER</p>
+      </div>
     </div>
 
-    <p class="name">FADI BOULOS KASS HANNA</p>
-    <p class="role">OWNER | GENERAL MANAGER</p>
-    <p class="role">GEOSPATIAL ENGINEER</p>
-
-    <p class="contactLine">+961 71 709 417</p>
-    <p class="contactLine">fadi@skygridlb.com</p>
+    <div class="contact">
+      <div>+961 71 709 417</div>
+      <div>fadi@skygridlb.com</div>
+    </div>
 
     <div class="socials">
-      <a href="https://www.facebook.com/" target="_blank" rel="noopener">Facebook</a>
-      <a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram</a>
-      <a href="https://www.linkedin.com/company/skygridlb/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://www.facebook.com/skygridlb" target="_blank" rel="noopener">Facebook</a>
+      <a href="https://www.instagram.com/skygridlb/" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://www.linkedin.com/company/skygridlb" target="_blank" rel="noopener">LinkedIn</a>
     </div>
+
+    <div class="tagline">YOUR SPACE • OUR DATA</div>
   </div>
 
   <script>
-    // Start location you gave
+    // Start location
     const startLat = 34.308659;
     const startLng = 35.941757;
     const startZoom = 18;
 
-    // Map (allow more zoom; Esri imagery generally supports up to ~21/22)
-    const map = L.map('map', {
-      zoomControl: true,
-      preferCanvas: true,
-      maxZoom: 22
-    }).setView([startLat, startLng], startZoom);
+    // Map
+    const map = L.map('map', { zoomControl: true, preferCanvas: true, maxZoom: 22 })
+      .setView([startLat, startLng], startZoom);
 
-    // Satellite (works on GitHub Pages)
-    const esriImagery = L.tileLayer(
+    // Satellite (Esri)
+    L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       { maxZoom: 22, attribution: 'Imagery © Esri' }
     ).addTo(map);
 
-    const esriLabels = L.tileLayer(
+    // optional labels overlay (keeps place names readable)
+    L.tileLayer(
       'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
       { maxZoom: 22, attribution: 'Labels © Esri' }
     ).addTo(map);
 
-    // Parcels styling
-    function parcelStyle(feature) {
-      return { color: '#ff3b30', weight: 2, fillColor: '#ff3b30', fillOpacity: 0.08 };
+    // Parcels style: red outline only
+    function parcelStyle() {
+      return { color: '#ff2d2d', weight: 1.5, fillOpacity: 0 };
     }
 
     function getAny(props, keys) {
@@ -261,19 +293,15 @@
       return null;
     }
 
-    // Your GeoJSON path (YOU SAID it's inside /data)
     const parcelsUrl = "data/EJBEH_PARCELS.geojson";
-
     let parcelsLayer = null;
 
-    // For autocomplete
     let parcelNums = [];
     let owners = [];
 
-    // Build lookup arrays
-    function uniqueSorted(arr) {
-      const s = new Set(arr.filter(v => v !== null && v !== undefined && String(v).trim() !== ""));
-      return Array.from(s).sort((a,b) => String(a).localeCompare(String(b), 'ar'));
+    function uniqueSorted(arr, locale) {
+      const s = new Set(arr.map(v => String(v).trim()).filter(v => v !== ""));
+      return Array.from(s).sort((a,b) => a.localeCompare(b, locale));
     }
 
     function zoomToLayer(layer) {
@@ -284,10 +312,7 @@
     }
 
     fetch(parcelsUrl)
-      .then(r => {
-        if (!r.ok) throw new Error("Could not load " + parcelsUrl);
-        return r.json();
-      })
+      .then(r => { if (!r.ok) throw new Error("Could not load " + parcelsUrl); return r.json(); })
       .then(geojson => {
 
         parcelsLayer = L.geoJSON(geojson, {
@@ -295,17 +320,17 @@
           onEachFeature: (feature, layer) => {
             const p = feature.properties || {};
 
-            // Fields for popup (ONLY these)
-            const owner = getAny(p, ["Owner", "OWNER", "Owners", "OWNERS", "Owners_All", "OWNERS_ALL"]);
-            const createdBy = getAny(p, ["CreatedBY", "CREATEDBY", "CreatedBy", "CREATED_BY"]);
-            const area = getAny(p, ["Area", "AREA", "Shape_Area", "SHAPE_AREA"]);
-            const mahalla = getAny(p, ["AL_MAHALLA", "Mahalla", "MAHALLA"]);
+            // Popup fields ONLY: Owner, CreatedBY, Area, AL_MAHALLA
+            const owner = getAny(p, ["Owner","OWNER","Owners","OWNERS","Owners_All","OWNERS_ALL"]);
+            const createdBy = getAny(p, ["CreatedBY","CREATEDBY","CreatedBy","CREATED_BY","PreparedBy","PREPAREDBY"]);
+            const area = getAny(p, ["Area","AREA","Shape_Area","SHAPE_AREA"]);
+            const mahalla = getAny(p, ["AL_MAHALLA","Mahalla","MAHALLA"]);
 
-            // Parcel number for searching (not necessarily shown)
-            const parcNum = getAny(p, ["Parc_Num", "PARC_NUM", "Parcel_Num", "PARCEL_NUM"]);
+            // Parcel number for searching
+            const parcNum = getAny(p, ["Parc_Num","PARC_NUM","Parcel_Num","PARCEL_NUM","PARCELNO","ParcelNo"]);
 
-            if (parcNum !== null) parcelNums.push(String(parcNum).trim());
-            if (owner !== null) owners.push(String(owner).trim());
+            if (parcNum !== null) parcelNums.push(parcNum);
+            if (owner !== null) owners.push(owner);
 
             const html = `
               <div class="popup-title">Parcel${parcNum ? " #" + parcNum : ""}</div>
@@ -318,17 +343,18 @@
             `;
             layer.bindPopup(html, { maxWidth: 520 });
 
-            layer.on('mouseover', () => layer.setStyle({ weight: 3, fillOpacity: 0.15 }));
-            layer.on('mouseout', () => layer.setStyle(parcelStyle(feature)));
+            // Hover highlight
+            layer.on('mouseover', () => layer.setStyle({ weight: 2.5 }));
+            layer.on('mouseout', () => layer.setStyle(parcelStyle()));
           }
         }).addTo(map);
 
-        // Fit to parcels
+        // Zoom to all parcels
         try { map.fitBounds(parcelsLayer.getBounds(), { padding: [20, 20] }); } catch(e) {}
 
-        // Setup autocomplete
-        parcelNums = uniqueSorted(parcelNums);
-        owners = uniqueSorted(owners);
+        // Autocomplete
+        parcelNums = uniqueSorted(parcelNums, "en");
+        owners = uniqueSorted(owners, "ar");
 
         new Awesomplete(document.getElementById("qParcel"), {
           list: parcelNums,
@@ -347,7 +373,6 @@
             return text.indexOf(input) !== -1;
           }
         });
-
       })
       .catch(err => {
         console.error(err);
@@ -359,15 +384,14 @@
         );
       });
 
-    // ===== Search actions =====
     function searchParcel() {
       const q = (document.getElementById("qParcel").value || "").trim();
       if (!q || !parcelsLayer) return;
 
       let found = null;
       parcelsLayer.eachLayer(l => {
-        const p = (l.feature && l.feature.properties) ? l.feature.properties : {};
-        const pn = getAny(p, ["Parc_Num","PARC_NUM","Parcel_Num","PARCEL_NUM"]);
+        const p = l.feature && l.feature.properties ? l.feature.properties : {};
+        const pn = getAny(p, ["Parc_Num","PARC_NUM","Parcel_Num","PARCEL_NUM","PARCELNO","ParcelNo"]);
         if (pn !== null && String(pn).trim() === q) found = l;
       });
 
@@ -381,29 +405,22 @@
 
       const matches = [];
       parcelsLayer.eachLayer(l => {
-        const p = (l.feature && l.feature.properties) ? l.feature.properties : {};
+        const p = l.feature && l.feature.properties ? l.feature.properties : {};
         const ow = getAny(p, ["Owner","OWNER","Owners","OWNERS","Owners_All","OWNERS_ALL"]);
         if (ow !== null) {
           const s = String(ow).trim();
-          // exact or contains
           if (s === q || s.indexOf(q) !== -1) matches.push(l);
         }
       });
 
-      if (matches.length === 0) {
-        alert("Owner not found: " + q);
-        return;
-      }
+      if (matches.length === 0) { alert("Owner not found: " + q); return; }
 
-      // Zoom to first match (simple + fast)
+      // Zoom to first match
       zoomToLayer(matches[0]);
-
-      // If you want: zoom to ALL matches bounds, tell me and I’ll modify.
-      // (Because owners can repeat across many parcels.)
     }
 
+    // Buttons
     document.getElementById("btnSearch").addEventListener("click", () => {
-      // Priority: parcel if filled, else owner
       const qP = (document.getElementById("qParcel").value || "").trim();
       const qO = (document.getElementById("qOwner").value || "").trim();
       if (qP) searchParcel();
@@ -420,34 +437,28 @@
       map.setView([startLat, startLng], startZoom);
     });
 
-    // Enter key triggers search
-    document.getElementById("qParcel").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") searchParcel();
-    });
-    document.getElementById("qOwner").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") searchOwner();
-    });
+    // Enter triggers
+    document.getElementById("qParcel").addEventListener("keydown", (e) => { if (e.key === "Enter") searchParcel(); });
+    document.getElementById("qOwner").addEventListener("keydown", (e) => { if (e.key === "Enter") searchOwner(); });
 
     // Autocomplete selection triggers zoom
     document.getElementById("qParcel").addEventListener("awesomplete-selectcomplete", () => searchParcel());
     document.getElementById("qOwner").addEventListener("awesomplete-selectcomplete", () => searchOwner());
 
-    // ===== Make panel smaller when zooming in =====
-    const topPanel = document.getElementById("topPanel");
+    // Compact on zoom (so the box doesn't cover imagery)
+    const topCard = document.getElementById("topCard");
     map.on("zoomend", () => {
       const z = map.getZoom();
-      if (z >= 19) topPanel.classList.add("compact");
-      else topPanel.classList.remove("compact");
+      // compact when zoomed in
+      if (z >= 19) topCard.classList.add("compact");
+      else topCard.classList.remove("compact");
     });
 
-    // Optional hide/show (so imagery is always visible)
-    const inputs = document.getElementById("inputs");
+    // Hide/Show panel
     const btnToggle = document.getElementById("btnToggle");
-    let isHidden = false;
     btnToggle.addEventListener("click", () => {
-      isHidden = !isHidden;
-      inputs.style.display = isHidden ? "none" : "grid";
-      btnToggle.textContent = isHidden ? "Show" : "Hide";
+      const hidden = topCard.classList.toggle("hidden");
+      btnToggle.textContent = hidden ? "Show" : "Hide";
     });
   </script>
 </body>
