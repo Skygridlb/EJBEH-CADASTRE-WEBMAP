@@ -448,15 +448,15 @@
             const mahalla = getAny(p, ["AL_MAHALLA","Mahalla","MAHALLA","ALMAHALLA"]);
             const parcelNum = getAny(p, ["Parc_Num","PARC_NUM","Parcel_Num","PARCEL_NUM","PARCELNO","ParcelNo"]);
 
-            const html = `
-              <div class="popup-title">Parcel${parcelNum ? " #" + parcelNum : ""}</div>
-              <div class="kv">
-                ${owner ? `<div class="k">Owner</div><div class="v">${owner}</div>` : ``}
-                ${preparedBy ? `<div class="k">Prepared</div><div class="v">${preparedBy}</div>` : ``}
-                ${mahalla ? `<div class="k">Mahalla</div><div class="v">${mahalla}</div>` : ``}
-                ${area ? `<div class="k">Area</div><div class="v">${area}</div>` : ``}
-              </div>
-            `;
+        const html = `
+  <div class="popup-title">Parcel${parcelNum ? " #" + parcelNum : ""}</div>
+  <div class="kv">
+    ${owner ? `<div class="k">Owner</div><div class="v" dir="rtl">${owner}</div>` : ``}
+    ${preparedBy ? `<div class="k">Prepared</div><div class="v">${preparedBy}</div>` : ``}
+    ${mahalla ? `<div class="k">Mahalla</div><div class="v" dir="rtl">${mahalla}</div>` : ``}
+    ${area ? `<div class="k">Area</div><div class="v">${area} m²</div>` : ``}
+  </div>
+`;
             layer.bindPopup(html, { maxWidth: 460 });
 
             layer.on("mouseover", ()=> layer.setStyle({ weight: 3, fillOpacity: 0.12 }));
