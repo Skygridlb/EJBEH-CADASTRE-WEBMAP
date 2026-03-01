@@ -9,114 +9,171 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- (Optional) search control -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+  <!-- Awesomplete (autocomplete) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.7/awesomplete.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.7/awesomplete.min.js"></script>
+
+  <!-- Font Awesome for social icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
     html, body { height: 100%; margin: 0; }
     #map { height: 100%; width: 100%; }
 
-    /* Branding UI (similar style: clean, glassy, fixed) */
-    .brand {
+    /* Glass branding panels */
+    .panel {
       position: absolute;
+      z-index: 9999;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(7px);
+      -webkit-backdrop-filter: blur(7px);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 14px;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.12);
+      font-family: Arial, sans-serif;
+    }
+
+    .brand {
       top: 14px;
       left: 14px;
-      z-index: 9999;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 12px;
       padding: 10px 12px;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
-      font-family: Arial, sans-serif;
-      max-width: 340px;
+      max-width: 420px;
     }
-    .brand .title { font-size: 16px; font-weight: 700; margin: 0 0 4px 0; }
-    .brand .sub { font-size: 12px; opacity: 0.75; margin: 0; }
+    .brand .title { font-size: 16px; font-weight: 800; margin: 0 0 4px 0; letter-spacing: 0.2px; }
+    .brand .sub { font-size: 12px; opacity: 0.8; margin: 0; }
 
     .logo {
-      position: absolute;
       top: 14px;
       right: 14px;
-      z-index: 9999;
-      width: 54px;
-      height: 54px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.92);
-      border: 1px solid rgba(0,0,0,0.08);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+      width: 58px;
+      height: 58px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      padding: 0;
     }
-    .logo img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+    .logo img { width: 100%; height: 100%; object-fit: contain; padding: 7px; }
 
+    /* Search panel */
+    .search {
+      top: 92px;
+      left: 14px;
+      padding: 10px 12px;
+      width: 420px;
+      max-width: calc(100vw - 28px);
+    }
+    .search .row { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    .search label { font-size: 12px; opacity: 0.75; display: block; margin-bottom: 4px; }
+    .search input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 12px;
+      padding: 10px 10px;
+      font-size: 14px;
+      outline: none;
+      background: white;
+    }
+    .search input:focus { border-color: rgba(11,95,255,0.45); box-shadow: 0 0 0 3px rgba(11,95,255,0.12); }
+    .hint { font-size: 12px; opacity: 0.65; margin-top: 6px; }
+
+    /* Footer */
     .footer {
-      position: absolute;
       left: 14px;
       bottom: 14px;
-      z-index: 9999;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 12px;
-      padding: 8px 10px;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
-      font-family: Arial, sans-serif;
-      font-size: 12px;
+      padding: 9px 10px;
       display: flex;
-      gap: 10px;
+      gap: 12px;
       align-items: center;
       flex-wrap: wrap;
+      font-size: 12px;
     }
-    .footer a { color: #0b5fff; text-decoration: none; }
+    .footer .name { font-weight: 800; }
+    .footer a {
+      color: #0b5fff;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
     .footer a:hover { text-decoration: underline; }
 
-    /* Popup styling */
-    .popup-title { font-weight: 700; margin-bottom: 6px; }
-    .kv { display: grid; grid-template-columns: 90px 1fr; gap: 6px 10px; }
-    .k { opacity: 0.75; }
-    .v { word-break: break-word; }
-
-    /* Small helper button */
     .btn {
       cursor: pointer;
       border: 1px solid rgba(0,0,0,0.12);
       background: white;
-      border-radius: 10px;
-      padding: 6px 10px;
+      border-radius: 12px;
+      padding: 7px 10px;
       font-size: 12px;
     }
     .btn:hover { background: #f3f5f7; }
+
+    /* Popup styling */
+    .popup-title { font-weight: 800; margin-bottom: 8px; }
+    .kv { display: grid; grid-template-columns: 110px 1fr; gap: 6px 10px; }
+    .k { opacity: 0.7; }
+    .v { word-break: break-word; }
+
+    /* Awesomplete dropdown max height */
+    .awesomplete > ul { max-height: 240px; overflow: auto; }
+
+    /* Mobile adjustments */
+    @media (max-width: 520px){
+      .search { width: calc(100vw - 28px); }
+      .brand { max-width: calc(100vw - 110px); }
+    }
   </style>
 </head>
 
 <body>
-  <!-- Branding (edit to match your cemetery map details) -->
-  <div class="brand">
+  <!-- Branding -->
+  <div class="panel brand">
     <p class="title">EJBEH CADASTRE MAP</p>
     <p class="sub">Parcels: EJBEH_PARCELS • Skygridlb</p>
   </div>
 
-  <!-- Logo (replace with your actual logo path) -->
-  <div class="logo" title="Skygridlb">
-    <!-- Put your logo file next to this HTML, e.g. skygridlb_logo.png -->
+  <!-- Logo -->
+  <div class="panel logo" title="Skygridlb">
     <img src="skygridlb_logo.png" alt="Skygridlb Logo" onerror="this.style.display='none';" />
+  </div>
+
+  <!-- Search box -->
+  <div class="panel search">
+    <div class="row">
+      <div>
+        <label for="qParcel">Search by Parcel Number</label>
+        <input id="qParcel" type="text" placeholder="e.g. 530" autocomplete="off">
+      </div>
+      <div>
+        <label for="qOwner">Search by Owner (Arabic) — autocomplete</label>
+        <input id="qOwner" type="text" placeholder="اكتب اسم المالك..." dir="rtl" autocomplete="off">
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <button class="btn" id="btnHome"><i class="fa-solid fa-house"></i> Home</button>
+        <button class="btn" id="btnClear"><i class="fa-solid fa-eraser"></i> Clear</button>
+      </div>
+      <div class="hint">Tip: choose from the dropdown. Parcel search zooms مباشرة للقطعة ويفتح الـ popup.</div>
+    </div>
   </div>
 
   <div id="map"></div>
 
   <!-- Footer / contact -->
-  <div class="footer">
-    <span><b>Skygridlb</b></span>
+  <div class="panel footer">
+    <span class="name">Skygridlb — Eng. Fadi Kasshanna</span>
     <span>© <span id="y"></span></span>
-    <!-- Edit these -->
-    <a href="https://www.linkedin.com/company/skygridlb/" target="_blank" rel="noopener">LinkedIn</a>
-    <button class="btn" id="btnHome">Home</button>
+
+    <!-- Replace links with your real pages if needed -->
+    <a href="https://www.linkedin.com/company/skygridlb/" target="_blank" rel="noopener">
+      <i class="fa-brands fa-linkedin"></i> LinkedIn
+    </a>
+    <a href="https://www.instagram.com/" target="_blank" rel="noopener">
+      <i class="fa-brands fa-instagram"></i> Instagram
+    </a>
+    <a href="https://www.facebook.com/" target="_blank" rel="noopener">
+      <i class="fa-brands fa-facebook"></i> Facebook
+    </a>
   </div>
 
   <script>
@@ -125,7 +182,7 @@
     // Start location you gave
     const startLat = 34.308659;
     const startLng = 35.941757;
-    const startZoom = 18;
+    const startZoom = 19; // more zoom at start
 
     // Map
     const map = L.map('map', {
@@ -133,39 +190,32 @@
       preferCanvas: true
     }).setView([startLat, startLng], startZoom);
 
-    // "Google satellite look" background:
-    // NOTE: Using real Google Satellite tiles directly is not allowed without Google's official API & terms.
-    // This Esri layer is a solid satellite substitute and works on GitHub Pages.
+    // Satellite (Esri World Imagery) — good "Google-like" satellite
     const esriImagery = L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      { maxZoom: 21, attribution: 'Imagery © Esri' }
+      { maxZoom: 23, attribution: 'Imagery © Esri' } // allow higher zoom
     ).addTo(map);
 
-    // Optional label overlay to make satellite readable
+    // Optional labels
     const esriLabels = L.tileLayer(
       'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-      { maxZoom: 21, attribution: 'Labels © Esri' }
+      { maxZoom: 23, attribution: 'Labels © Esri' }
     ).addTo(map);
 
-    const baseLayers = {
-      "Satellite (Esri)": esriImagery
-    };
-    const overlays = {
-      "Labels": esriLabels
-    };
-    L.control.layers(baseLayers, overlays, { collapsed: true }).addTo(map);
+    L.control.layers(
+      { "Satellite": esriImagery },
+      { "Labels": esriLabels },
+      { collapsed: true }
+    ).addTo(map);
 
     // Parcels styling
-    function parcelStyle(feature) {
-      return {
-        color: '#ff3b30',     // red outline
-        weight: 2,
-        fillColor: '#ff3b30',
-        fillOpacity: 0.08
-      };
+    function parcelStyle() {
+      return { color: '#ff3b30', weight: 2, fillColor: '#ff3b30', fillOpacity: 0.08 };
+    }
+    function parcelStyleHover() {
+      return { weight: 3, fillOpacity: 0.15 };
     }
 
-    // Popup helper: safely get property by trying multiple keys (because field names vary)
     function getAny(props, keys) {
       for (const k of keys) {
         if (props && props[k] !== undefined && props[k] !== null && String(props[k]).trim() !== "") {
@@ -175,16 +225,56 @@
       return null;
     }
 
-    // Load your parcels GeoJSON
-    // Export EJBEH_PARCELS to GeoJSON and put it next to this HTML as: EJBEH_PARCELS.geojson
-    // (ArcGIS Pro: Features To JSON -> GeoJSON, or QGIS: Save Features As -> GeoJSON)
+    // ===== Load GeoJSON =====
     const parcelsUrl = "data/EJBEH_PARCELS.geojson";
 
     let parcelsLayer = null;
 
+    // Indexes for quick search
+    const byParcel = new Map();   // parcelNum -> layer
+    const byOwner  = new Map();   // ownerName -> [layers]
+
+    // Autocomplete instances
+    const qParcel = document.getElementById("qParcel");
+    const qOwner  = document.getElementById("qOwner");
+
+    let acParcel = new Awesomplete(qParcel, { minChars: 1, maxItems: 20, autoFirst: true });
+    let acOwner  = new Awesomplete(qOwner,  { minChars: 1, maxItems: 20, autoFirst: true });
+
+    function zoomToLayer(layer) {
+      if (!layer) return;
+      try {
+        map.fitBounds(layer.getBounds(), { padding: [30, 30], maxZoom: 21 });
+      } catch(e) {
+        // fallback if bounds not available
+      }
+      layer.openPopup();
+    }
+
+    function popupHtml(props) {
+      // ONLY: owner, preparedby, area, al mahalla
+      const owner = getAny(props, ["Owner", "OWNER", "Owners_All", "OWNERS_ALL"]);
+      const prepared = getAny(props, ["PreparedBy", "PREPAREDBY", "CreatedBY", "CREATEDBY", "CreatedBy", "createdby"]);
+      const mahalla = getAny(props, ["AL_MAHALLA", "Mahalla", "MAHALLA"]);
+      const area = getAny(props, ["Area", "AREA", "Shape_Area", "SHAPE_AREA"]);
+
+      // Title: if you have parcel number
+      const parcelNum = getAny(props, ["Parc_Num", "PARC_NUM", "Parcel_Num", "PARCEL_NUM", "PARCELNO", "ParcelNo"]);
+
+      return `
+        <div class="popup-title">Parcel${parcelNum ? " #" + parcelNum : ""}</div>
+        <div class="kv">
+          ${owner ? `<div class="k">Owner</div><div class="v">${owner}</div>` : ""}
+          ${prepared ? `<div class="k">Prepared By</div><div class="v">${prepared}</div>` : ""}
+          ${mahalla ? `<div class="k">Al Mahalla</div><div class="v">${mahalla}</div>` : ""}
+          ${area ? `<div class="k">Area</div><div class="v">${area}</div>` : ""}
+        </div>
+      `;
+    }
+
     fetch(parcelsUrl)
       .then(r => {
-        if (!r.ok) throw new Error("Could not load " + parcelsUrl);
+        if (!r.ok) throw new Error("Could not load " + parcelsUrl + " (HTTP " + r.status + ")");
         return r.json();
       })
       .then(geojson => {
@@ -193,73 +283,96 @@
           onEachFeature: (feature, layer) => {
             const p = feature.properties || {};
 
-            // Try common field names (adjust to your actual schema)
+            // popup
+            layer.bindPopup(popupHtml(p), { maxWidth: 460 });
+
+            // hover highlight
+            layer.on('mouseover', () => layer.setStyle(parcelStyleHover()));
+            layer.on('mouseout', () => layer.setStyle(parcelStyle()));
+
+            // Build search indexes
             const parcelNum = getAny(p, ["Parc_Num", "PARC_NUM", "Parcel_Num", "PARCEL_NUM", "PARCELNO", "ParcelNo"]);
             const owner = getAny(p, ["Owner", "OWNER", "Owners_All", "OWNERS_ALL"]);
-            const mahalla = getAny(p, ["AL_MAHALLA", "Mahalla", "MAHALLA"]);
-            const area = getAny(p, ["Area", "AREA", "Shape_Area", "SHAPE_AREA"]);
 
-            const html = `
-              <div class="popup-title">Parcel${parcelNum ? " #" + parcelNum : ""}</div>
-              <div class="kv">
-                ${owner ? `<div class="k">Owner</div><div class="v">${owner}</div>` : ""}
-                ${mahalla ? `<div class="k">Mahalla</div><div class="v">${mahalla}</div>` : ""}
-                ${area ? `<div class="k">Area</div><div class="v">${area}</div>` : ""}
-              </div>
-            `;
+            if (parcelNum !== null) {
+              const key = String(parcelNum).trim();
+              if (key !== "") byParcel.set(key, layer);
+            }
 
-            layer.bindPopup(html, { maxWidth: 420 });
-
-            // Hover highlight
-            layer.on('mouseover', () => layer.setStyle({ weight: 3, fillOpacity: 0.15 }));
-            layer.on('mouseout', () => layer.setStyle(parcelStyle(feature)));
+            if (owner !== null) {
+              const key = String(owner).trim();
+              if (key !== "") {
+                if (!byOwner.has(key)) byOwner.set(key, []);
+                byOwner.get(key).push(layer);
+              }
+            }
           }
         }).addTo(map);
 
+        // Fit to parcels
         try { map.fitBounds(parcelsLayer.getBounds(), { padding: [20, 20] }); } catch(e) {}
+
+        // Fill autocomplete lists
+        acParcel.list = Array.from(byParcel.keys()).sort((a,b) => a.localeCompare(b, undefined, {numeric:true}));
+        acOwner.list  = Array.from(byOwner.keys()).sort();
+
       })
       .catch(err => {
         console.error(err);
-        alert("GeoJSON not found. Put EJBEH_PARCELS.geojson next to the HTML file.\n\nError: " + err.message);
+        alert("Failed to load: " + parcelsUrl + "\n\n" + err.message);
       });
 
-    // Home button
+    // ===== Search behavior =====
+    function selectParcel(value) {
+      const key = String(value || "").trim();
+      const layer = byParcel.get(key);
+      if (layer) zoomToLayer(layer);
+      else alert("Parcel not found: " + key);
+    }
+
+    function selectOwner(value) {
+      const key = String(value || "").trim();
+      const layers = byOwner.get(key);
+      if (!layers || layers.length === 0) {
+        alert("Owner not found: " + key);
+        return;
+      }
+
+      // If owner has multiple parcels, zoom to all
+      if (layers.length === 1) {
+        zoomToLayer(layers[0]);
+      } else {
+        const group = L.featureGroup(layers);
+        map.fitBounds(group.getBounds(), { padding: [30, 30], maxZoom: 20 });
+        // open first popup
+        layers[0].openPopup();
+      }
+    }
+
+    // Awesomplete selection events
+    qParcel.addEventListener("awesomplete-selectcomplete", (e) => {
+      selectParcel(e.text.value);
+    });
+    qOwner.addEventListener("awesomplete-selectcomplete", (e) => {
+      selectOwner(e.text.value);
+    });
+
+    // Enter key: also run search
+    qParcel.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); selectParcel(qParcel.value); }
+    });
+    qOwner.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); selectOwner(qOwner.value); }
+    });
+
+    // Buttons
     document.getElementById("btnHome").addEventListener("click", () => {
       map.setView([startLat, startLng], startZoom);
     });
-
-    // Search:
-    // 1) Geocoder search (places) - optional
-    if (L.Control && L.Control.Geocoder) {
-      L.Control.geocoder({
-        defaultMarkGeocode: true
-      }).addTo(map);
-    }
-
-    // 2) Parcel search by Parcel Number (simple prompt)
-    // If you want a nice search box like your cemetery map, tell me what library you used there
-    // (or upload that HTML) and I’ll match it exactly.
-    map.on('keypress', (e) => {
-      // Press "/" key to search parcel number quickly
-      if (e.originalEvent && e.originalEvent.key === "/") {
-        e.originalEvent.preventDefault();
-        const q = prompt("Search Parcel Number (Parc_Num):");
-        if (!q || !parcelsLayer) return;
-
-        let found = null;
-        parcelsLayer.eachLayer(l => {
-          const props = l.feature && l.feature.properties ? l.feature.properties : {};
-          const pn = getAny(props, ["Parc_Num", "PARC_NUM", "Parcel_Num", "PARCEL_NUM"]);
-          if (pn !== null && String(pn).trim() === String(q).trim()) found = l;
-        });
-
-        if (found) {
-          map.fitBounds(found.getBounds(), { padding: [30, 30] });
-          found.openPopup();
-        } else {
-          alert("Not found: " + q);
-        }
-      }
+    document.getElementById("btnClear").addEventListener("click", () => {
+      qParcel.value = "";
+      qOwner.value = "";
+      qParcel.focus();
     });
   </script>
 </body>
