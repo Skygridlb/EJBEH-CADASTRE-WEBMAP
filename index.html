@@ -9,272 +9,317 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Awesomplete (autocomplete) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.7/awesomplete.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.7/awesomplete.min.js"></script>
-
-  <!-- Font Awesome for social icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
   <style>
     html, body { height: 100%; margin: 0; }
     #map { height: 100%; width: 100%; }
 
-    /* Glass branding panels */
+    /* ===== Branding panel (mobile-first) ===== */
     .panel {
       position: absolute;
-      z-index: 9999;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(7px);
-      -webkit-backdrop-filter: blur(7px);
-      border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 14px;
-      box-shadow: 0 10px 26px rgba(0,0,0,0.12);
-      font-family: Arial, sans-serif;
-    }
-
-    .brand {
       top: 14px;
       left: 14px;
+      z-index: 9999;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 14px;
       padding: 10px 12px;
-      max-width: 420px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+      font-family: Arial, sans-serif;
+      width: min(380px, calc(100vw - 28px));
     }
-    .brand .title { font-size: 16px; font-weight: 800; margin: 0 0 4px 0; letter-spacing: 0.2px; }
-    .brand .sub { font-size: 12px; opacity: 0.8; margin: 0; }
 
-    .logo {
-      top: 14px;
-      right: 14px;
-      width: 58px;
-      height: 58px;
+    .panel.compact {
+      width: min(240px, calc(100vw - 28px));
+      padding: 8px 10px;
+    }
+
+    .panel .head {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .panel .logo {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.95);
+      border: 1px solid rgba(0,0,0,0.08);
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      padding: 0;
+      flex: 0 0 auto;
     }
-    .logo img { width: 100%; height: 100%; object-fit: contain; padding: 7px; }
 
-    /* Search panel */
-    .search {
-      top: 92px;
-      left: 14px;
-      padding: 10px 12px;
-      width: 420px;
-      max-width: calc(100vw - 28px);
-    }
-    .search .row { display: grid; grid-template-columns: 1fr; gap: 8px; }
-    .search label { font-size: 12px; opacity: 0.75; display: block; margin-bottom: 4px; }
-    .search input {
+    .panel .logo img {
       width: 100%;
-      box-sizing: border-box;
+      height: 100%;
+      object-fit: contain;
+      padding: 4px;
+      display: block;
+    }
+
+    .panel .title { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
+    .panel .sub { font-size: 12px; opacity: 0.75; margin: 2px 0 0 0; }
+
+    .panel.compact .title { font-size: 14px; }
+    .panel.compact .sub { font-size: 11px; }
+    .panel.compact .logo { width: 34px; height: 34px; }
+
+    .panel .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      margin: 10px 0 6px 0;
+      opacity: 0.85;
+    }
+
+    .panel.compact .section-title { margin-top: 8px; }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .input {
+      width: 100%;
       border: 1px solid rgba(0,0,0,0.12);
       border-radius: 12px;
-      padding: 10px 10px;
+      padding: 10px 12px;
       font-size: 14px;
       outline: none;
       background: white;
     }
-    .search input:focus { border-color: rgba(11,95,255,0.45); box-shadow: 0 0 0 3px rgba(11,95,255,0.12); }
-    .hint { font-size: 12px; opacity: 0.65; margin-top: 6px; }
 
-    /* Footer */
-    .footer {
-      left: 14px;
-      bottom: 14px;
-      padding: 9px 10px;
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-      font-size: 12px;
+    .panel.compact .input {
+      padding: 8px 10px;
+      font-size: 13px;
     }
-    .footer .name { font-weight: 800; }
-    .footer a {
-      color: #0b5fff;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .footer a:hover { text-decoration: underline; }
 
     .btn {
       cursor: pointer;
       border: 1px solid rgba(0,0,0,0.12);
       background: white;
       border-radius: 12px;
-      padding: 7px 10px;
-      font-size: 12px;
+      padding: 8px 10px;
+      font-size: 13px;
+      white-space: nowrap;
     }
     .btn:hover { background: #f3f5f7; }
 
-    /* Popup styling */
-    .popup-title { font-weight: 800; margin-bottom: 8px; }
-    .kv { display: grid; grid-template-columns: 110px 1fr; gap: 6px 10px; }
-    .k { opacity: 0.7; }
-    .v { word-break: break-word; }
+    .tip {
+      font-size: 11px;
+      margin-top: 8px;
+      opacity: 0.75;
+    }
 
-    /* Awesomplete dropdown max height */
-    .awesomplete > ul { max-height: 240px; overflow: auto; }
+    /* Footer (like cemetery style, clickable phone/email) */
+    .footer {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      z-index: 9999;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 14px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      width: min(520px, calc(100vw - 28px));
+    }
 
-    /* Mobile adjustments */
-    @media (max-width: 520px){
-      .search { width: calc(100vw - 28px); }
-      .brand { max-width: calc(100vw - 110px); }
+    .footer .line1 { font-weight: 800; margin-bottom: 2px; }
+    .footer .line2 { opacity: 0.85; margin-bottom: 6px; }
+
+    .footer a {
+      color: #0b5fff;
+      text-decoration: none;
+      margin-right: 10px;
+      display: inline-block;
+    }
+    .footer a:hover { text-decoration: underline; }
+
+    .footer .chips a{
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: #111;
+      background: #fff;
+      text-decoration: none;
+      margin-right: 8px;
+    }
+    .footer .chips a:hover { background: #f3f5f7; }
+
+    /* Make panel not block map too much on small screens */
+    @media (max-width: 480px) {
+      .panel { top: 10px; left: 10px; width: calc(100vw - 20px); }
+      .footer { left: 10px; bottom: 10px; width: calc(100vw - 20px); }
     }
   </style>
 </head>
 
 <body>
-  <!-- Branding -->
-  <div class="panel brand">
-    <p class="title">EJBEH CADASTRE MAP</p>
-    <p class="sub">Parcels: EJBEH_PARCELS • Skygridlb</p>
-  </div>
-
-  <!-- Logo -->
-  <div class="panel logo" title="Skygridlb">
-    <img src="skygridlb_logo.png" alt="Skygridlb Logo" onerror="this.style.display='none';" />
-  </div>
-
-  <!-- Search box -->
-  <div class="panel search">
-    <div class="row">
-      <div>
-        <label for="qParcel">Search by Parcel Number</label>
-        <input id="qParcel" type="text" placeholder="e.g. 530" autocomplete="off">
+  <!-- Branding + Search -->
+  <div class="panel" id="panel">
+    <div class="head">
+      <div class="logo" title="Skygridlb">
+        <!-- IMPORTANT: put skygrid-logo-.png next to index.html -->
+        <img src="skygrid-logo-.png" alt="Skygridlb" />
       </div>
       <div>
-        <label for="qOwner">Search by Owner (Arabic) — autocomplete</label>
-        <input id="qOwner" type="text" placeholder="اكتب اسم المالك..." dir="rtl" autocomplete="off">
+        <p class="title">EJBEH CADASTRE MAP</p>
+        <p class="sub">Parcels: EJBEH_PARCELS • Skygridlb</p>
       </div>
-      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-        <button class="btn" id="btnHome"><i class="fa-solid fa-house"></i> Home</button>
-        <button class="btn" id="btnClear"><i class="fa-solid fa-eraser"></i> Clear</button>
-      </div>
-      <div class="hint">Tip: choose from the dropdown. Parcel search zooms مباشرة للقطعة ويفتح الـ popup.</div>
     </div>
+
+    <div class="section-title">Search by Parcel Number</div>
+    <div class="row">
+      <input class="input" id="parcelSearch" type="text" inputmode="numeric" placeholder="e.g. 530" />
+      <button class="btn" id="btnParcelGo">Go</button>
+    </div>
+
+    <div class="section-title">Search by Owner</div>
+    <div class="row">
+      <input class="input" id="ownerSearch" type="text" placeholder="اكتب اسم المالك..." list="ownerList" />
+      <datalist id="ownerList"></datalist>
+      <button class="btn" id="btnOwnerGo">Go</button>
+    </div>
+
+    <div class="row" style="margin-top:8px;">
+      <button class="btn" id="btnClear">Clear</button>
+    </div>
+
+    <div class="tip">Tip: choose from dropdown. Search zooms and opens popup.</div>
   </div>
 
   <div id="map"></div>
 
-  <!-- Footer / contact -->
-  <div class="panel footer">
-    <span class="name">Skygridlb — Eng. Fadi Kasshanna</span>
-    <span>© <span id="y"></span></span>
-
-    <!-- Replace links with your real pages if needed -->
-    <a href="https://www.linkedin.com/company/skygridlb/" target="_blank" rel="noopener">
-      <i class="fa-brands fa-linkedin"></i> LinkedIn
-    </a>
-    <a href="https://www.instagram.com/" target="_blank" rel="noopener">
-      <i class="fa-brands fa-instagram"></i> Instagram
-    </a>
-    <a href="https://www.facebook.com/" target="_blank" rel="noopener">
-      <i class="fa-brands fa-facebook"></i> Facebook
-    </a>
+  <!-- Footer contact (clickable phone/email + social) -->
+  <div class="footer">
+    <div class="line1">Skygridlb — Eng. Fadi Kasshanna</div>
+    <div class="line2">
+      <a href="tel:+96171709417">+961 71 709 417</a>
+      <a href="mailto:fadi@skygridlb.com">fadi@skygridlb.com</a>
+      <span>© <span id="y"></span></span>
+    </div>
+    <div class="chips">
+      <a href="https://www.facebook.com/skygridlb" target="_blank" rel="noopener">Facebook</a>
+      <a href="https://www.linkedin.com/company/skygridlb" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://www.instagram.com/skygridlb/" target="_blank" rel="noopener">Instagram</a>
+    </div>
   </div>
 
   <script>
     document.getElementById("y").textContent = new Date().getFullYear();
 
-    // Start location you gave
+    // Start location
     const startLat = 34.308659;
     const startLng = 35.941757;
-    const startZoom = 19; // more zoom at start
+    const startZoom = 18;
 
-    // Map
+    // Map (allow more zoom)
     const map = L.map('map', {
       zoomControl: true,
-      preferCanvas: true
+      preferCanvas: true,
+      maxZoom: 22 // try 22 (Esri usually supports up to 21/22)
     }).setView([startLat, startLng], startZoom);
 
-    // Satellite (Esri World Imagery) — good "Google-like" satellite
-    const esriImagery = L.tileLayer(
+    // Satellite (Esri World Imagery)
+    const imagery = L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      { maxZoom: 23, attribution: 'Imagery © Esri' } // allow higher zoom
+      { maxZoom: 22, attribution: 'Imagery © Esri' }
     ).addTo(map);
 
-    // Optional labels
-    const esriLabels = L.tileLayer(
+    // Labels overlay
+    const labels = L.tileLayer(
       'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-      { maxZoom: 23, attribution: 'Labels © Esri' }
+      { maxZoom: 22, attribution: 'Labels © Esri' }
     ).addTo(map);
 
-    L.control.layers(
-      { "Satellite": esriImagery },
-      { "Labels": esriLabels },
-      { collapsed: true }
-    ).addTo(map);
-
-    // Parcels styling
+    // Parcels style
     function parcelStyle() {
-      return { color: '#ff3b30', weight: 2, fillColor: '#ff3b30', fillOpacity: 0.08 };
-    }
-    function parcelStyleHover() {
-      return { weight: 3, fillOpacity: 0.15 };
+      return {
+        color: '#ff2d2d',
+        weight: 2,
+        fillColor: '#ff2d2d',
+        fillOpacity: 0.06
+      };
     }
 
-    function getAny(props, keys) {
+    function getAny(p, keys) {
       for (const k of keys) {
-        if (props && props[k] !== undefined && props[k] !== null && String(props[k]).trim() !== "") {
-          return props[k];
+        const v = p ? p[k] : null;
+        if (v !== undefined && v !== null && String(v).trim() !== "" && String(v).trim().toLowerCase() !== "none") {
+          return v;
         }
       }
       return null;
     }
 
-    // ===== Load GeoJSON =====
+    // Update this if your GeoJSON is in /data/
     const parcelsUrl = "data/EJBEH_PARCELS.geojson";
 
     let parcelsLayer = null;
+    let indexByParcel = new Map(); // parcelNum -> layer
+    let indexByOwner = new Map();  // ownerText -> [layers]
+    let ownerNames = new Set();
 
-    // Indexes for quick search
-    const byParcel = new Map();   // parcelNum -> layer
-    const byOwner  = new Map();   // ownerName -> [layers]
-
-    // Autocomplete instances
-    const qParcel = document.getElementById("qParcel");
-    const qOwner  = document.getElementById("qOwner");
-
-    let acParcel = new Awesomplete(qParcel, { minChars: 1, maxItems: 20, autoFirst: true });
-    let acOwner  = new Awesomplete(qOwner,  { minChars: 1, maxItems: 20, autoFirst: true });
-
-    function zoomToLayer(layer) {
-      if (!layer) return;
-      try {
-        map.fitBounds(layer.getBounds(), { padding: [30, 30], maxZoom: 21 });
-      } catch(e) {
-        // fallback if bounds not available
-      }
-      layer.openPopup();
+    function normalize(s){
+      return String(s || "").trim();
     }
 
-    function popupHtml(props) {
-      // ONLY: owner, preparedby, area, al mahalla
-      const owner = getAny(props, ["Owner", "OWNER", "Owners_All", "OWNERS_ALL"]);
-      const prepared = getAny(props, ["PreparedBy", "PREPAREDBY", "CreatedBY", "CREATEDBY", "CreatedBy", "createdby"]);
-      const mahalla = getAny(props, ["AL_MAHALLA", "Mahalla", "MAHALLA"]);
-      const area = getAny(props, ["Area", "AREA", "Shape_Area", "SHAPE_AREA"]);
+    function buildIndexes(layer) {
+      indexByParcel.clear();
+      indexByOwner.clear();
+      ownerNames.clear();
 
-      // Title: if you have parcel number
-      const parcelNum = getAny(props, ["Parc_Num", "PARC_NUM", "Parcel_Num", "PARCEL_NUM", "PARCELNO", "ParcelNo"]);
+      layer.eachLayer(l => {
+        const p = (l.feature && l.feature.properties) ? l.feature.properties : {};
 
-      return `
-        <div class="popup-title">Parcel${parcelNum ? " #" + parcelNum : ""}</div>
-        <div class="kv">
-          ${owner ? `<div class="k">Owner</div><div class="v">${owner}</div>` : ""}
-          ${prepared ? `<div class="k">Prepared By</div><div class="v">${prepared}</div>` : ""}
-          ${mahalla ? `<div class="k">Al Mahalla</div><div class="v">${mahalla}</div>` : ""}
-          ${area ? `<div class="k">Area</div><div class="v">${area}</div>` : ""}
-        </div>
-      `;
+        const parcelNum = getAny(p, ["Parc_Num","PARC_NUM","Parcel_Num","PARCEL_NUM","ParcelNo","PARCELNO","PARCEL"]);
+        const owner = getAny(p, ["Owner","OWNER","Owners","OWNERS","Owners_All","OWNERS_ALL"]);
+        const ownerStr = normalize(owner);
+
+        if (parcelNum !== null) {
+          indexByParcel.set(normalize(parcelNum), l);
+        }
+
+        // owner could contain multiple owners separated by "/"
+        if (ownerStr) {
+          ownerNames.add(ownerStr);
+
+          const key = ownerStr;
+          if (!indexByOwner.has(key)) indexByOwner.set(key, []);
+          indexByOwner.get(key).push(l);
+        }
+      });
+
+      // Fill datalist for autocomplete
+      const dl = document.getElementById("ownerList");
+      dl.innerHTML = "";
+      [...ownerNames].sort().slice(0, 5000).forEach(name => { // safety cap
+        const opt = document.createElement("option");
+        opt.value = name;
+        dl.appendChild(opt);
+      });
+    }
+
+    function focusLayer(l) {
+      map.fitBounds(l.getBounds(), { padding: [30, 30], maxZoom: 21 });
+      l.openPopup();
+      l.setStyle({ weight: 3, fillOpacity: 0.12 });
+      setTimeout(() => l.setStyle(parcelStyle()), 800);
     }
 
     fetch(parcelsUrl)
       .then(r => {
-        if (!r.ok) throw new Error("Could not load " + parcelsUrl + " (HTTP " + r.status + ")");
+        if (!r.ok) throw new Error("Could not load " + parcelsUrl);
         return r.json();
       })
       .then(geojson => {
@@ -283,97 +328,104 @@
           onEachFeature: (feature, layer) => {
             const p = feature.properties || {};
 
-            // popup
-            layer.bindPopup(popupHtml(p), { maxWidth: 460 });
+            // Only show: owner, preparedby, area, al_mahalla
+            const owner = getAny(p, ["Owner","OWNER","Owners_All","OWNERS_ALL","Owners","OWNERS"]);
+            const prepared = getAny(p, ["PreparedBy","PREPAREDBY","CreatedBY","CREATEDBY","CreatedBy","CREATED_BY"]);
+            const area = getAny(p, ["Area","AREA","Shape_Area","SHAPE_AREA"]);
+            const mahalla = getAny(p, ["AL_MAHALLA","Mahalla","MAHALLA"]);
 
-            // hover highlight
-            layer.on('mouseover', () => layer.setStyle(parcelStyleHover()));
+            const parcelNum = getAny(p, ["Parc_Num","PARC_NUM","Parcel_Num","PARCEL_NUM","ParcelNo","PARCELNO","PARCEL"]);
+
+            const rows = [];
+            if (owner) rows.push(`<div class="k">Owner</div><div class="v">${owner}</div>`);
+            if (prepared) rows.push(`<div class="k">Prepared</div><div class="v">${prepared}</div>`);
+            if (area) rows.push(`<div class="k">Area</div><div class="v">${area}</div>`);
+            if (mahalla) rows.push(`<div class="k">Mahalla</div><div class="v">${mahalla}</div>`);
+
+            const html = `
+              <div style="font-weight:800;margin-bottom:6px;">Parcel${parcelNum ? " #" + parcelNum : ""}</div>
+              <div style="display:grid;grid-template-columns:90px 1fr;gap:6px 10px;">
+                ${rows.join("")}
+              </div>
+            `;
+
+            layer.bindPopup(html, { maxWidth: 420 });
+
+            layer.on('mouseover', () => layer.setStyle({ weight: 3, fillOpacity: 0.12 }));
             layer.on('mouseout', () => layer.setStyle(parcelStyle()));
-
-            // Build search indexes
-            const parcelNum = getAny(p, ["Parc_Num", "PARC_NUM", "Parcel_Num", "PARCEL_NUM", "PARCELNO", "ParcelNo"]);
-            const owner = getAny(p, ["Owner", "OWNER", "Owners_All", "OWNERS_ALL"]);
-
-            if (parcelNum !== null) {
-              const key = String(parcelNum).trim();
-              if (key !== "") byParcel.set(key, layer);
-            }
-
-            if (owner !== null) {
-              const key = String(owner).trim();
-              if (key !== "") {
-                if (!byOwner.has(key)) byOwner.set(key, []);
-                byOwner.get(key).push(layer);
-              }
-            }
           }
         }).addTo(map);
 
-        // Fit to parcels
-        try { map.fitBounds(parcelsLayer.getBounds(), { padding: [20, 20] }); } catch(e) {}
+        // Fit bounds once
+        try { map.fitBounds(parcelsLayer.getBounds(), { padding: [20,20] }); } catch(e) {}
 
-        // Fill autocomplete lists
-        acParcel.list = Array.from(byParcel.keys()).sort((a,b) => a.localeCompare(b, undefined, {numeric:true}));
-        acOwner.list  = Array.from(byOwner.keys()).sort();
-
+        // Build search indexes + autocomplete
+        buildIndexes(parcelsLayer);
       })
       .catch(err => {
         console.error(err);
-        alert("Failed to load: " + parcelsUrl + "\n\n" + err.message);
+        alert("GeoJSON not found.\nPut EJBEH_PARCELS.geojson inside /data/ next to your HTML.\n\nError: " + err.message);
       });
 
-    // ===== Search behavior =====
-    function selectParcel(value) {
-      const key = String(value || "").trim();
-      const layer = byParcel.get(key);
-      if (layer) zoomToLayer(layer);
-      else alert("Parcel not found: " + key);
-    }
+    // Search actions
+    function doParcelSearch() {
+      if (!parcelsLayer) return;
+      const q = normalize(document.getElementById("parcelSearch").value);
+      if (!q) return;
 
-    function selectOwner(value) {
-      const key = String(value || "").trim();
-      const layers = byOwner.get(key);
-      if (!layers || layers.length === 0) {
-        alert("Owner not found: " + key);
-        return;
-      }
-
-      // If owner has multiple parcels, zoom to all
-      if (layers.length === 1) {
-        zoomToLayer(layers[0]);
+      const layer = indexByParcel.get(q);
+      if (layer) {
+        focusLayer(layer);
       } else {
-        const group = L.featureGroup(layers);
-        map.fitBounds(group.getBounds(), { padding: [30, 30], maxZoom: 20 });
-        // open first popup
-        layers[0].openPopup();
+        alert("Parcel not found: " + q);
       }
     }
 
-    // Awesomplete selection events
-    qParcel.addEventListener("awesomplete-selectcomplete", (e) => {
-      selectParcel(e.text.value);
+    function doOwnerSearch() {
+      if (!parcelsLayer) return;
+      const q = normalize(document.getElementById("ownerSearch").value);
+      if (!q) return;
+
+      const layers = indexByOwner.get(q);
+      if (layers && layers.length) {
+        // If multiple parcels share same owner, zoom to bounds of all
+        const group = L.featureGroup(layers);
+        map.fitBounds(group.getBounds(), { padding: [30,30], maxZoom: 20 });
+
+        // Open first popup (you can change this to nearest)
+        layers[0].openPopup();
+      } else {
+        alert("Owner not found: " + q);
+      }
+    }
+
+    document.getElementById("btnParcelGo").addEventListener("click", doParcelSearch);
+    document.getElementById("btnOwnerGo").addEventListener("click", doOwnerSearch);
+
+    document.getElementById("parcelSearch").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") doParcelSearch();
     });
-    qOwner.addEventListener("awesomplete-selectcomplete", (e) => {
-      selectOwner(e.text.value);
+    document.getElementById("ownerSearch").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") doOwnerSearch();
     });
 
-    // Enter key: also run search
-    qParcel.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { e.preventDefault(); selectParcel(qParcel.value); }
-    });
-    qOwner.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { e.preventDefault(); selectOwner(qOwner.value); }
-    });
-
-    // Buttons
-    document.getElementById("btnHome").addEventListener("click", () => {
-      map.setView([startLat, startLng], startZoom);
-    });
+    // Clear
     document.getElementById("btnClear").addEventListener("click", () => {
-      qParcel.value = "";
-      qOwner.value = "";
-      qParcel.focus();
+      document.getElementById("parcelSearch").value = "";
+      document.getElementById("ownerSearch").value = "";
+      map.setView([startLat, startLng], startZoom);
+      if (parcelsLayer) parcelsLayer.eachLayer(l => l.setStyle(parcelStyle()));
     });
+
+    // Auto-compact panel when zoomed in (so it doesn't cover imagery)
+    const panel = document.getElementById("panel");
+    function updatePanelSize() {
+      const z = map.getZoom();
+      if (z >= 20) panel.classList.add("compact");
+      else panel.classList.remove("compact");
+    }
+    map.on("zoomend", updatePanelSize);
+    updatePanelSize();
   </script>
 </body>
 </html>
