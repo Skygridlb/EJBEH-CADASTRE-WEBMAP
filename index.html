@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>EJBEH CADASTRE MAP</title>
 
-  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -163,6 +162,26 @@
     }
     .v.rtl { direction: rtl; text-align: right; }
 
+    /* ==================================================== */
+    /* NEW CSS: PARCEL NUMBER LABELS ON MAP                 */
+    /* ==================================================== */
+    .parcel-label {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      color: #ffffff;
+      /* Adds a black outline to the text making it readable over both light and dark backgrounds */
+      text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+      /* Ensures the label doesn't block you from clicking the polygon underneath */
+      pointer-events: none; 
+    }
+    .parcel-label::before {
+      display: none; /* Removes the default leaflet tooltip arrow */
+    }
+
     /* ========= RESPONSIVE ========= */
     @media (max-width: 520px) {
       .topbar { gap: 8px; padding: 8px; }
@@ -182,7 +201,6 @@
 </head>
 
 <body>
-  <!-- TOP SEARCH BAR -->
   <div class="topbar">
     <input id="q"
            list="suggestions"
@@ -195,7 +213,6 @@
 
   <div class="hint" id="hint">Tip: start typing a parcel number or an owner name and choose from the dropdown.</div>
 
-  <!-- Title badge -->
   <div class="badge">
     <p class="t">EJBEH CADASTRE MAP</p>
     <p class="s">Parcels: EJBEH_PARCELS • Skygridlb</p>
@@ -203,10 +220,8 @@
 
   <div id="map"></div>
 
-  <!-- Branding card bottom-left -->
   <div class="brandCard">
     <div class="brandLogo" title="Skygridlb">
-      <!-- Logo file MUST be at repo root: skygridlb.png -->
       <img src="skygridlb.png" alt="Skygridlb" />
     </div>
     <div class="brandText">
@@ -380,9 +395,19 @@
             const parcelNum = getAny(p, ["Parc_Num","PARC_NUM","Parcel_Num","PARCEL_NUM","ParcNum","PARCELNO"]);
             const owner     = getAny(p, ["Owner","OWNER","Owners_All","OWNERS_ALL"]);
 
+            // ==================================================== 
+            // NEW JAVASCRIPT: BIND LABEL TO PARCEL
+            // ==================================================== 
             if (parcelNum !== null) {
               const pn = norm(parcelNum);
               if (pn) {
+                // Add permanent text label to the center of the polygon
+                layer.bindTooltip(pn, {
+                  permanent: true,
+                  direction: "center",
+                  className: "parcel-label"
+                });
+
                 parcelIndex.set(pn, layer);
                 addSuggestion(pn);
               }
